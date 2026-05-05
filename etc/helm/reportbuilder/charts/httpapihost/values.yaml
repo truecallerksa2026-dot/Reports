@@ -1,0 +1,4 @@
+image:
+  repository: "reportbuilder/httpapihost"
+  tag: "latest"
+  pullPolicy: IfNotPresent

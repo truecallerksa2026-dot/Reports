@@ -1,0 +1,4 @@
+image:
+  repository: "reportbuilder/angular"
+  tag: "latest"
+  pullPolicy: IfNotPresent

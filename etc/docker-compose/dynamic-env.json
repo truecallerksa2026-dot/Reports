@@ -1,0 +1,25 @@
+{
+  "production": true,
+  "application": {
+    "baseUrl":"http://localhost:4200",
+    "name": "ReportBuilder",
+    "logoUrl": ""
+  },
+  "oAuthConfig": {
+    "issuer": "https://localhost:44356/",
+    "redirectUri": "http://localhost:4200",
+    "clientId": "ReportBuilder_App",
+    "responseType": "code",
+    "scope": "offline_access openid profile email phone ReportBuilder"
+  },
+  "apis": {
+    "default": {
+      "url": "https://localhost:44356",
+      "rootNamespace": "ReportBuilder"
+    },
+    "AbpAccountPublic": {
+      "url": "https://localhost:44356",
+      "rootNamespace": "AbpAccountPublic"
+    }
+  }
+}

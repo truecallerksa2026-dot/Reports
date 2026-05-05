@@ -1,0 +1,23 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU" />
+    </Configurations>
+    <Folder Name="/src/">
+        <Project Path="src/ReportBuilder.Domain/ReportBuilder.Domain.csproj" />
+        <Project Path="src/ReportBuilder.Application/ReportBuilder.Application.csproj" />
+        <Project Path="src/ReportBuilder.EntityFrameworkCore/ReportBuilder.EntityFrameworkCore.csproj" />
+        <Project Path="src/ReportBuilder.Domain.Shared/ReportBuilder.Domain.Shared.csproj" />
+        <Project Path="src/ReportBuilder.Application.Contracts/ReportBuilder.Application.Contracts.csproj" />
+        <Project Path="src/ReportBuilder.HttpApi/ReportBuilder.HttpApi.csproj" />
+        <Project Path="src/ReportBuilder.HttpApi.Client/ReportBuilder.HttpApi.Client.csproj" />
+        <Project Path="src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj" />
+        <Project Path="src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/ReportBuilder.Application.Tests/ReportBuilder.Application.Tests.csproj" />
+        <Project Path="test/ReportBuilder.EntityFrameworkCore.Tests/ReportBuilder.EntityFrameworkCore.Tests.csproj" />
+        <Project Path="test/ReportBuilder.TestBase/ReportBuilder.TestBase.csproj" />
+        <Project Path="test/ReportBuilder.Domain.Tests/ReportBuilder.Domain.Tests.csproj" />
+        <Project Path="test/ReportBuilder.HttpApi.Client.ConsoleTestApp/ReportBuilder.HttpApi.Client.ConsoleTestApp.csproj" />
+    </Folder>
+</Solution>

@@ -1,0 +1,129 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXTheme": {
+      "version": "5.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"      
+    },
+    "Volo.Abp.TextTemplateManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.LanguageManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.OpenIddict.Pro": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.Gdpr": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.AuditLogging.Pro": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Saas": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.Identity.Pro": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.Account.Pro": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/05/2026 12:49:09 +00:00"
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "ReportBuilder.Application": {
+      "path": "src/ReportBuilder.Application/ReportBuilder.Application.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.Application.Tests": {
+      "path": "test/ReportBuilder.Application.Tests/ReportBuilder.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "ReportBuilder.Domain.Shared": {
+      "path": "src/ReportBuilder.Domain.Shared/ReportBuilder.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.Application.Contracts": {
+      "path": "src/ReportBuilder.Application.Contracts/ReportBuilder.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.HttpApi": {
+      "path": "src/ReportBuilder.HttpApi/ReportBuilder.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.HttpApi.Client": {
+      "path": "src/ReportBuilder.HttpApi.Client/ReportBuilder.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.EntityFrameworkCore.Tests": {
+      "path": "test/ReportBuilder.EntityFrameworkCore.Tests/ReportBuilder.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "ReportBuilder.EntityFrameworkCore": {
+      "path": "src/ReportBuilder.EntityFrameworkCore/ReportBuilder.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.TestBase": {
+      "path": "test/ReportBuilder.TestBase/ReportBuilder.TestBase.abppkg",
+      "folder": "test"
+    },
+    "ReportBuilder.Domain.Tests": {
+      "path": "test/ReportBuilder.Domain.Tests/ReportBuilder.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "ReportBuilder.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/ReportBuilder.HttpApi.Client.ConsoleTestApp/ReportBuilder.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "ReportBuilder.DbMigrator": {
+      "path": "src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.HttpApi.Host": {
+      "path": "src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "ReportBuilder.Domain": {
+      "path": "src/ReportBuilder.Domain/ReportBuilder.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}

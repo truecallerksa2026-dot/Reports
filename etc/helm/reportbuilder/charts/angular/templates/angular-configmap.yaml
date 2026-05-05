@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-configmap
+data:
+  dynamic-env.json: |-
+    {
+        "production": "true",
+        "application": {
+            "baseUrl": "{{ include "reportbuilder.hosts.angular" . }}",
+            "name": "ReportBuilder",
+            "logoUrl": ""
+        },
+        "oAuthConfig": {
+            "issuer": "{{ include "reportbuilder.hosts.httpapi" . }}",
+            "redirectUri": "{{ include "reportbuilder.hosts.angular" . }}",
+            "requireHttps": "false",
+            "clientId": "ReportBuilder_App",
+            "responseType": "code",
+            "scope": "offline_access ReportBuilder",
+            "strictDiscoveryDocumentValidation": false,
+            "skipIssuerCheck": true
+        },
+        "apis": {
+            "default": {
+                "url": "{{ include "reportbuilder.hosts.httpapi" . }}",
+                "rootNamespace": "ReportBuilder"
+            }
+        }
+    }
