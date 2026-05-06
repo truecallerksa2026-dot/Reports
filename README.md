@@ -1,80 +1,96 @@
 # ReportBuilder
 
-## About this solution
+Dynamic report builder built on ABP Commercial (Angular + .NET 10 + PostgreSQL).
 
-This is a layered startup solution based on [Domain Driven Design (DDD)](https://abp.io/docs/latest/framework/architecture/domain-driven-design) practises. All the fundamental ABP modules are already installed. Check the [Application Startup Template](https://abp.io/docs/latest/solution-templates/layered-web-application) documentation for more info.
+---
 
-### Pre-requirements
+## Run with Docker (recommended)
 
-* [.NET10.0+ SDK](https://dotnet.microsoft.com/download/dotnet)
-* [Node v18 or 20](https://nodejs.org/en)
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 
-### Configurations
+### 1 — Add the local domain to your hosts file
 
-The solution comes with a default configuration that works out of the box. However, you may consider to change the following configuration before running your solution:
-
-* Check the `ConnectionStrings` in `appsettings.json` files under the `ReportBuilder.HttpApi.Host` and `ReportBuilder.DbMigrator` projects and change it if you need.
-
-### Before running the application
-
-* Run `abp install-libs` command on your solution folder to install client-side package dependencies. This step is automatically done when you create a new solution, if you didn't especially disabled it. However, you should run it yourself if you have first cloned this solution from your source control, or added a new client-side package dependency to your solution.
-* Run `ReportBuilder.DbMigrator` to create the initial database. This step is also automatically done when you create a new solution, if you didn't especially disabled it. This should be done in the first run. It is also needed if a new database migration is added to the solution later.
-
-#### Generating a Signing Certificate
-
-In the production environment, you need to use a production signing certificate. ABP Framework sets up signing and encryption certificates in your application and expects an `openiddict.pfx` file in your application.
-
-To generate a signing certificate, you can use the following command:
-
-```bash
-dotnet dev-certs https -v -ep openiddict.pfx -p fd092b11-86a2-4a31-9949-875ac31369ce
+**Windows** — open Notepad as Administrator, edit `C:\Windows\System32\drivers\etc\hosts`:
+```
+127.0.0.1  dev-reports.local
 ```
 
-> `fd092b11-86a2-4a31-9949-875ac31369ce` is the password of the certificate, you can change it to any password you want.
+**Mac / Linux:**
+```bash
+sudo sh -c 'echo "127.0.0.1 dev-reports.local" >> /etc/hosts'
+```
 
-It is recommended to use **two** RSA certificates, distinct from the certificate(s) used for HTTPS: one for encryption, one for signing.
+### 2 — Clone and start
 
-For more information, please refer to: [OpenIddict Certificate Configuration](https://documentation.openiddict.com/configuration/encryption-and-signing-credentials.html#registering-a-certificate-recommended-for-production-ready-scenarios)
+```bash
+git clone https://github.com/AhmedSasko/ReportBuilder.git
+cd ReportBuilder
+docker compose -f docker-compose.dev-reports.yml up --build
+```
 
-> Also, see the [Configuring OpenIddict](https://abp.io/docs/latest/Deployment/Configuring-OpenIddict#production-environment) documentation for more information.
+First run takes ~5 minutes (builds .NET + Angular from source). Subsequent starts are fast.
 
-### Solution structure
+### 3 — Open the app
 
-This is a layered monolith application that consists of the following applications:
+```
+http://dev-reports.local
+```
 
-* `angular`: Angular application.
-* `ReportBuilder.DbMigrator`: A console application which applies the migrations and also seeds the initial data. It is useful on development as well as on production environment.
-* `ReportBuilder.HttpApi.Host`: ASP.NET Core API application that is used to expose the APIs to the clients.
+| Field    | Value     |
+|----------|-----------|
+| Username | `admin`   |
+| Password | `1q2w3E*` |
 
-#### Test Projects
+> **That is it. No other configuration needed.**
 
-The `test` folder contains the following test projects:
+---
 
-* `ReportBuilder.Application.Tests`: Application layer tests.
-* `ReportBuilder.Domain.Tests`: Domain layer tests.
-* `ReportBuilder.EntityFrameworkCore.Tests`: Entity Framework Core integration tests.
+## Run locally without Docker
 
+### Prerequisites
+- .NET 10 SDK
+- Node.js 20 + Yarn
+- PostgreSQL 16 running on localhost:5432
 
+Spin up just the database with Docker:
+```bash
+docker compose up -d
+```
 
+### Steps
 
-## Deploying the application
+```bash
+# 1 — Migrate and seed
+dotnet run --project src/ReportBuilder.DbMigrator
 
-Deploying an ABP application follows the same process as deploying any .NET or ASP.NET Core application. However, there are important considerations to keep in mind. For detailed guidance, refer to ABP's [deployment documentation](https://abp.io/docs/latest/Deployment/Index).
+# 2 — Start the API  (https://localhost:44356)
+dotnet run --project src/ReportBuilder.HttpApi.Host
 
-### Additional resources
+# 3 — Start Angular  (http://localhost:4200)
+cd angular && yarn install && yarn start
+```
 
+---
 
-#### Internal Resources
+## Architecture
 
-You can find detailed setup and configuration guide(s) for your solution below:
+```
+nginx (port 80, dev-reports.local)
+  ├── /api, /connect, /Account ...  →  .NET 10 API (ABP + OpenIddict + EF Core)
+  └── /*                            →  Angular SPA (LeptonX theme)
 
-* [Local Kubernetes Guide](./etc/helm/README.md)
-* [Angular](./angular/README.md)
+PostgreSQL 16
+  ├── rw_user  — read/write (API writes)
+  └── ro_user  — read-only  (report query execution)
+```
 
-#### External Resources
-You can see the following resources to learn more about your solution and the ABP Framework:
+## Features
 
-* [Web Application Development Tutorial](https://abp.io/docs/latest/tutorials/book-store/part-1)
-* [Application Startup Template](https://abp.io/docs/latest/startup-templates/application/index)
-* [LeptonX Theme Module](https://abp.io/docs/latest/themes/lepton-x/index)
-* [LeptonX Angular UI](https://abp.io/docs/latest/themes/lepton-x/angular)
+- **Report definitions** — define SQL queries with `@paramName` parameters
+- **Column editor** — visibility, filterability, sortability, grouping per column
+- **Column role permissions** — show/hide columns per role with expand arrow (▶) in the Columns tab
+- **Report permissions** — restrict entire reports to specific roles
+- **Grid view** — DevExtreme DataGrid with server-side paging and export
+- **Report view** — clean printable table with Load More support
+- **Student module** — sample data with 100 seeded student records
