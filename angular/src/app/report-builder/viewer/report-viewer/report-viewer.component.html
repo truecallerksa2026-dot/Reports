@@ -1,0 +1,208 @@
+<div class="report-viewer-wrap" *ngIf="report">
+
+  <!-- Toolbar (hidden on print) -->
+  <div class="report-toolbar no-print">
+    <div class="report-toolbar-left">
+      <h4 class="report-title-bar">{{ report.name }}</h4>
+      <span *ngIf="report.description" class="report-desc-bar">{{ report.description }}</span>
+    </div>
+    <div class="report-toolbar-right">
+      <button class="btn btn-sm btn-outline-secondary" (click)="print()">
+        <i class="fa fa-print me-1"></i> Print
+      </button>
+    </div>
+  </div>
+
+  <!-- Parameter form -->
+  <div class="no-print">
+    <app-parameter-form
+      [parameters]="report.parameters"
+      (apply)="execute($event)">
+    </app-parameter-form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !result" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <!-- Report document -->
+  <div class="report-document" *ngIf="result">
+
+    <!-- Report header (print-only header) -->
+    <div class="report-header">
+      <div class="report-header-title">{{ report.name }}</div>
+      <div class="report-header-meta" *ngIf="report.description">{{ report.description }}</div>
+      <div class="report-header-date">Generated: {{ today | date:'medium' }}</div>
+    </div>
+
+    <!-- Table -->
+    <div class="report-table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th *ngFor="let col of result.columns">{{ col.displayName }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of result.rows; let odd = odd" [class.odd]="odd">
+            <td *ngFor="let col of result.columns">{{ formatValue(getCellValue(row, col), col) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer summary -->
+    <div class="report-footer no-print">
+      <span class="report-count">Showing {{ result.rows.length | number }} of {{ result.totalCount | number }} records</span>
+      <button
+        *ngIf="hasMore"
+        class="btn btn-sm btn-outline-primary ms-3"
+        (click)="loadMore()"
+        [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+        Load more
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Layout ── */
+.report-viewer-wrap {
+  padding: 0 4px;
+}
+
+/* ── Toolbar ── */
+.report-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+  gap: 12px;
+}
+.report-toolbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.report-title-bar {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+.report-desc-bar {
+  font-size: .85rem;
+  color: #6c757d;
+}
+
+/* ── Document ── */
+.report-document {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ── Report header (visible when printing) ── */
+.report-header {
+  display: none;
+  padding: 20px 24px 12px;
+  border-bottom: 2px solid #0d6efd;
+}
+.report-header-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0d6efd;
+}
+.report-header-meta {
+  font-size: .9rem;
+  color: #555;
+  margin-top: 4px;
+}
+.report-header-date {
+  font-size: .78rem;
+  color: #888;
+  margin-top: 8px;
+}
+
+/* ── Table ── */
+.report-table-wrap {
+  overflow-x: auto;
+}
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .875rem;
+}
+.report-table thead tr {
+  background: #0d6efd;
+  color: #fff;
+}
+.report-table thead th {
+  padding: 10px 14px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  letter-spacing: .02em;
+}
+.report-table tbody tr {
+  border-bottom: 1px solid #f1f3f5;
+  transition: background .1s;
+}
+.report-table tbody tr:hover {
+  background: #f0f4ff;
+}
+.report-table tbody tr.odd {
+  background: #f8f9fa;
+}
+.report-table tbody tr.odd:hover {
+  background: #e8eeff;
+}
+.report-table td {
+  padding: 8px 14px;
+  color: #343a40;
+  vertical-align: middle;
+}
+
+/* ── Footer ── */
+.report-footer {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+.report-count {
+  font-size: .8rem;
+  color: #6c757d;
+}
+
+/* ── Print ── */
+@media print {
+  .no-print { display: none !important; }
+  .report-header { display: block !important; }
+  .report-document {
+    border: none;
+    box-shadow: none;
+  }
+  .report-table thead tr {
+    background: #0d6efd !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report-table tbody tr.odd {
+    background: #f8f9fa !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report-table td, .report-table th {
+    padding: 6px 10px;
+  }
+}
+</style>

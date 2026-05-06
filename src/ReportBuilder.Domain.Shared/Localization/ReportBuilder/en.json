@@ -34,6 +34,14 @@
     "TakePhoto": "Take Photo",
     "ChoosePhoto": "Choose Photo",
     "Menu:Home": "Home",
+    "Menu:ReportBuilder": "Report Builder",
+    "Menu:Students": "Students",
+    "Permission:Students": "Students",
+    "Permission:Students.Create": "Create Student",
+    "Permission:Students.Edit": "Edit Student",
+    "Permission:Students.Delete": "Delete Student",
+    "Menu:ReportBuilder:Catalog": "Reports",
+    "Menu:ReportBuilder:Admin": "Manage Reports",
     "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information visit",
     "Welcome": "Welcome"
   }

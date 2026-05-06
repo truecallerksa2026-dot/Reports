@@ -1,0 +1,33 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Project-level shared props and ABP Commercial NuGet feed
+COPY common.props .
+COPY NuGet.Config .
+
+# Copy project files first for layer caching
+COPY src/ReportBuilder.Domain.Shared/ReportBuilder.Domain.Shared.csproj                 src/ReportBuilder.Domain.Shared/
+COPY src/ReportBuilder.Domain/ReportBuilder.Domain.csproj                               src/ReportBuilder.Domain/
+COPY src/ReportBuilder.Application.Contracts/ReportBuilder.Application.Contracts.csproj src/ReportBuilder.Application.Contracts/
+COPY src/ReportBuilder.Application/ReportBuilder.Application.csproj                     src/ReportBuilder.Application/
+COPY src/ReportBuilder.EntityFrameworkCore/ReportBuilder.EntityFrameworkCore.csproj     src/ReportBuilder.EntityFrameworkCore/
+COPY src/ReportBuilder.HttpApi/ReportBuilder.HttpApi.csproj                             src/ReportBuilder.HttpApi/
+COPY src/ReportBuilder.HttpApi.Client/ReportBuilder.HttpApi.Client.csproj               src/ReportBuilder.HttpApi.Client/
+COPY src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj                   src/ReportBuilder.HttpApi.Host/
+
+RUN dotnet restore src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj
+
+COPY src/ src/
+
+RUN dotnet publish src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj \
+    -c Release -o /app/publish --no-restore
+
+# Generate OpenIddict signing cert (used in Production environment mode)
+RUN dotnet dev-certs https -ep /app/publish/openiddict.pfx \
+    -p fd092b11-86a2-4a31-9949-875ac31369ce
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://+:80
+ENTRYPOINT ["dotnet", "ReportBuilder.HttpApi.Host.dll"]

@@ -1,0 +1,26 @@
+{
+  "production": true,
+  "application": {
+    "baseUrl": "http://dev-reports.local",
+    "name": "ReportBuilder",
+    "logoUrl": ""
+  },
+  "oAuthConfig": {
+    "issuer": "http://dev-reports.local/",
+    "redirectUri": "http://dev-reports.local",
+    "clientId": "ReportBuilder_App",
+    "responseType": "code",
+    "scope": "offline_access openid profile email phone ReportBuilder",
+    "requireHttps": false
+  },
+  "apis": {
+    "default": {
+      "url": "http://dev-reports.local",
+      "rootNamespace": "ReportBuilder"
+    },
+    "AbpAccountPublic": {
+      "url": "http://dev-reports.local",
+      "rootNamespace": "AbpAccountPublic"
+    }
+  }
+}

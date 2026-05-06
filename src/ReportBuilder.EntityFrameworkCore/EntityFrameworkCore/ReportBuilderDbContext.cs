@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using ReportBuilder.Reports;
+using ReportBuilder.Students;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -30,7 +32,13 @@ public class ReportBuilderDbContext :
     ISaasDbContext,
     IIdentityProDbContext
 {
-    /* Add DbSet properties for your Aggregate Roots / Entities here. */
+    /* Report Builder entities */
+    public DbSet<Student> Students { get; set; }
+    public DbSet<ReportDefinition> ReportDefinitions { get; set; }
+    public DbSet<ReportColumn> ReportColumns { get; set; }
+    public DbSet<ColumnPermission> ColumnPermissions { get; set; }
+    public DbSet<ReportParameter> ReportParameters { get; set; }
+    public DbSet<ReportPermission> ReportPermissions { get; set; }
 
 
     #region Entities from the modules
@@ -88,14 +96,9 @@ public class ReportBuilderDbContext :
         builder.ConfigureTextTemplateManagement();
         builder.ConfigureGdpr();
         builder.ConfigureBlobStoring();
-        
+
         /* Configure your own tables/entities inside here */
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(ReportBuilderConsts.DbTablePrefix + "YourEntities", ReportBuilderConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+        builder.ConfigureReportBuilder();
     }
 }

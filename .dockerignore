@@ -1,0 +1,11 @@
+**/obj/
+**/bin/
+**/.vs/
+**/.vscode/
+**/.angular/
+**/node_modules/
+**/.DS_Store
+*.user
+*.suo
+.git/
+.gitignore

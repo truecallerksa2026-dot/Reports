@@ -1,0 +1,20 @@
+{
+  "/api": {
+    "target": "https://localhost:44356",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
+  "/connect": {
+    "target": "https://localhost:44356",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
+  "/.well-known": {
+    "target": "https://localhost:44356",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  }
+}

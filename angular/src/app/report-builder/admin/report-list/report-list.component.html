@@ -1,0 +1,80 @@
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center py-3">
+    <h5 class="mb-0 fw-semibold">
+      <i class="fa fa-table me-2 text-primary"></i>Report Definitions
+    </h5>
+    <button class="btn btn-primary btn-sm px-3" (click)="createNew()">
+      <i class="fa fa-plus me-1"></i> New Report
+    </button>
+  </div>
+
+  <div class="card-body p-0">
+    <dx-data-grid
+      [dataSource]="reports"
+      [remoteOperations]="false"
+      [showBorders]="false"
+      [showRowLines]="true"
+      [showColumnLines]="false"
+      [rowAlternationEnabled]="false"
+      [loadPanel]="{ enabled: loading }"
+      [columnAutoWidth]="false">
+
+      <dxo-paging [pageSize]="15"></dxo-paging>
+      <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 30, 50]" [showInfo]="true"></dxo-pager>
+      <dxo-search-panel [visible]="true" placeholder="Search reports..."></dxo-search-panel>
+
+      <dxi-column dataField="name" caption="Name" [minWidth]="160" [sortOrder]="'asc'" cellTemplate="nameTpl"></dxi-column>
+      <dxi-column dataField="description" caption="Description" [minWidth]="200" cellTemplate="descTpl"></dxi-column>
+      <dxi-column dataField="displayMode" caption="Mode" [width]="90"  cellTemplate="modeTpl"></dxi-column>
+      <dxi-column dataField="isActive"    caption="Status" [width]="95" cellTemplate="statusTpl"></dxi-column>
+      <dxi-column dataField="creationTime" caption="Created" dataType="date" [width]="110"></dxi-column>
+      <dxi-column caption="Actions" [allowSorting]="false" [width]="115" cellTemplate="actionsTpl"></dxi-column>
+
+      <div *dxTemplate="let cell of 'nameTpl'">
+        <span class="fw-medium">{{ cell.value }}</span>
+      </div>
+      <div *dxTemplate="let cell of 'descTpl'">
+        <span class="text-muted small">{{ cell.value || '—' }}</span>
+      </div>
+      <div *dxTemplate="let cell of 'modeTpl'">
+        <span class="rl-badge"
+          [class.rl-grid]="cell.value === 0"
+          [class.rl-report]="cell.value === 1"
+          [class.rl-both]="cell.value === 2">
+          {{ getDisplayModeLabel(cell.value) }}
+        </span>
+      </div>
+      <div *dxTemplate="let cell of 'statusTpl'">
+        <span class="rl-status" [class.rl-active]="cell.value" [class.rl-inactive]="!cell.value">
+          {{ cell.value ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      <div *dxTemplate="let cell of 'actionsTpl'" class="rl-actions">
+        <button class="rl-btn rl-edit"   (click)="edit(cell.data.id)"        title="Edit"><i class="fa fa-edit"></i></button>
+        <button class="rl-btn rl-toggle" (click)="toggleActive(cell.data)"
+          [title]="cell.data.isActive ? 'Deactivate' : 'Activate'">
+          <i class="fa" [class.fa-toggle-on]="cell.data.isActive" [class.fa-toggle-off]="!cell.data.isActive"></i>
+        </button>
+        <button class="rl-btn rl-delete" (click)="delete(cell.data.id)"      title="Delete"><i class="fa fa-trash"></i></button>
+      </div>
+    </dx-data-grid>
+  </div>
+</div>
+
+<style>
+.rl-badge { display:inline-block; font-size:.7rem; font-weight:600; padding:2px 9px; border-radius:10px; }
+.rl-grid   { background:#dbeafe; color:#1d4ed8; }
+.rl-report { background:#fef3c7; color:#92400e; }
+.rl-both   { background:#d1fae5; color:#065f46; }
+
+.rl-status { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:600; }
+.rl-status::before { content:''; display:inline-block; width:7px; height:7px; border-radius:50%; }
+.rl-active  { color:#15803d; } .rl-active::before  { background:#22c55e; }
+.rl-inactive{ color:#6b7280; } .rl-inactive::before{ background:#9ca3af; }
+
+.rl-actions { display:flex; gap:4px; align-items:center; }
+.rl-btn { width:30px; height:30px; border:none; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.8rem; cursor:pointer; transition:all .15s; }
+.rl-edit   { background:#eff6ff; color:#2563eb; } .rl-edit:hover   { background:#2563eb; color:#fff; }
+.rl-toggle { background:#fffbeb; color:#d97706; } .rl-toggle:hover { background:#d97706; color:#fff; }
+.rl-delete { background:#fef2f2; color:#dc2626; } .rl-delete:hover { background:#dc2626; color:#fff; }
+</style>

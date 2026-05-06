@@ -1,0 +1,62 @@
+<div class="card" *ngIf="report">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h4 class="card-title mb-0">{{ report.name }}</h4>
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <i class="fa fa-download me-1"></i> Export
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="javascript:void(0)" (click)="exportPdf()"><i class="fa fa-file-pdf me-2 text-danger"></i>PDF</a></li>
+        <li><a class="dropdown-item" href="javascript:void(0)" (click)="exportExcel()"><i class="fa fa-file-excel me-2 text-success"></i>Excel</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <app-parameter-form
+      [parameters]="report.parameters"
+      (apply)="execute($event)">
+    </app-parameter-form>
+
+    <div *ngIf="loading" class="text-center py-4">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <dx-data-grid
+      *ngIf="result && !loading"
+      [dataSource]="result.rows"
+      [showBorders]="true"
+      [rowAlternationEnabled]="true"
+      [remoteOperations]="true"
+      (onOptionChanged)="onPageChanged($event)">
+
+      <dxo-paging [pageSize]="pageSize"></dxo-paging>
+      <dxo-pager
+        [showPageSizeSelector]="true"
+        [allowedPageSizes]="[10, 20, 50, 100]"
+        [showInfo]="true"
+        [infoText]="'Page {0} of {1} ({2} rows)'">
+      </dxo-pager>
+
+      <dxi-column
+        *ngFor="let col of result.columns"
+        [dataField]="col.fieldName"
+        [caption]="col.displayName"
+        [dataType]="col.dataType === 1 ? 'number' : col.dataType === 2 ? 'date' : col.dataType === 3 ? 'boolean' : 'string'"
+        [allowSorting]="col.isSortable"
+        [allowFiltering]="col.isFilterable"
+        [allowGrouping]="col.isGroupable"
+        [width]="col.width || undefined">
+      </dxi-column>
+
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
+      <dxo-group-panel [visible]="true"></dxo-group-panel>
+    </dx-data-grid>
+
+    <div *ngIf="result && !loading" class="text-muted small mt-2">
+      Total: {{ result.totalCount | number }} records
+    </div>
+
+  </div>
+</div>

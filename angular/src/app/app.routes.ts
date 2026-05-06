@@ -53,4 +53,14 @@ export const APP_ROUTES: Routes = [
     path: 'setting-management',
     loadChildren: () => import('@abp/ng.setting-management').then(c => c.createRoutes()),
   },
+  {
+    path: 'report-builder',
+    loadChildren: () =>
+      import('./report-builder/report-builder.module').then(m => m.ReportBuilderModule),
+  },
+  {
+    path: 'students',
+    loadChildren: () =>
+      import('./students/students.module').then(m => m.StudentsModule),
+  },
 ];

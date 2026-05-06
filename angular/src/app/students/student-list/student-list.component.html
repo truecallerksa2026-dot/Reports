@@ -1,0 +1,182 @@
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="card-title mb-0">Students</h3>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <i class="fa fa-plus me-1"></i> New Student
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card-body border-bottom pb-3">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="text" class="form-control" placeholder="Search name, ID, email, mobile..."
+          [(ngModel)]="filterText" (keyup.enter)="loadStudents()" />
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="filterStatus" (change)="loadStudents()">
+          <option value="">All Statuses</option>
+          <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="filterGender" (change)="loadStudents()">
+          <option value="">All Genders</option>
+          <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" (click)="loadStudents()">
+          <i class="fa fa-search me-1"></i> Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <dx-data-grid
+      [dataSource]="students"
+      [remoteOperations]="false"
+      [showBorders]="false"
+      [rowAlternationEnabled]="true"
+      [loadPanel]="{ enabled: loading }"
+      (onOptionChanged)="onPageChange($event)">
+
+      <dxo-paging [pageSize]="20"></dxo-paging>
+      <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[10, 20, 50]" [showInfo]="true"></dxo-pager>
+
+      <dxi-column dataField="name" caption="Name" [sortOrder]="'asc'"></dxi-column>
+      <dxi-column dataField="nationalId" caption="National ID" [width]="130"></dxi-column>
+      <dxi-column dataField="gender" caption="Gender" [width]="90" cellTemplate="genderTemplate"></dxi-column>
+      <dxi-column dataField="grade" caption="Grade" [width]="100"></dxi-column>
+      <dxi-column dataField="country" caption="Country" [width]="120"></dxi-column>
+      <dxi-column dataField="region" caption="Region" [width]="120"></dxi-column>
+      <dxi-column dataField="mobile" caption="Mobile" [width]="130"></dxi-column>
+      <dxi-column dataField="email" caption="Email"></dxi-column>
+      <dxi-column dataField="gpa" caption="GPA" [width]="80" dataType="number" [format]="{ type: 'fixedPoint', precision: 2 }"></dxi-column>
+      <dxi-column dataField="status" caption="Status" [width]="110" cellTemplate="statusTemplate"></dxi-column>
+      <dxi-column caption="Actions" [width]="110" [allowSorting]="false" cellTemplate="actionsTemplate"></dxi-column>
+
+      <div *dxTemplate="let cell of 'genderTemplate'">
+        {{ getGenderLabel(cell.value) }}
+      </div>
+
+      <div *dxTemplate="let cell of 'statusTemplate'">
+        <span [class]="getStatusBadgeClass(cell.value)">{{ getStatusLabel(cell.value) }}</span>
+      </div>
+
+      <div *dxTemplate="let cell of 'actionsTemplate'">
+        <button class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(cell.data.id)" title="Edit">
+          <i class="fa fa-edit"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger" (click)="delete(cell.data.id)" title="Delete">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </dx-data-grid>
+  </div>
+  <div class="card-footer text-muted small">Total: {{ totalCount }} students</div>
+</div>
+
+<!-- Create / Edit Modal -->
+<div class="modal fade" [class.show]="modalVisible" [style.display]="modalVisible ? 'block' : 'none'"
+  tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" (click)="modalVisible = false"></button>
+      </div>
+      <div class="modal-body">
+        <form #studentForm="ngForm">
+          <div class="row g-3">
+            <!-- Name -->
+            <div class="col-md-6">
+              <label class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="form.name" name="name" required maxlength="256" />
+            </div>
+            <!-- National ID -->
+            <div class="col-md-6">
+              <label class="form-label">National ID <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="form.nationalId" name="nationalId" required maxlength="20" />
+            </div>
+            <!-- Gender -->
+            <div class="col-md-4">
+              <label class="form-label">Gender</label>
+              <select class="form-select" [(ngModel)]="form.gender" name="gender">
+                <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+              </select>
+            </div>
+            <!-- Date of Birth -->
+            <div class="col-md-4">
+              <label class="form-label">Date of Birth</label>
+              <input type="date" class="form-control" [(ngModel)]="form.dateOfBirth" name="dateOfBirth" />
+            </div>
+            <!-- Status -->
+            <div class="col-md-4">
+              <label class="form-label">Status</label>
+              <select class="form-select" [(ngModel)]="form.status" name="status">
+                <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+              </select>
+            </div>
+            <!-- Grade -->
+            <div class="col-md-4">
+              <label class="form-label">Grade</label>
+              <select class="form-select" [(ngModel)]="form.grade" name="grade">
+                <option *ngFor="let g of gradeOptions" [value]="g">{{ g }}</option>
+              </select>
+            </div>
+            <!-- GPA -->
+            <div class="col-md-4">
+              <label class="form-label">GPA (0–4)</label>
+              <input type="number" class="form-control" [(ngModel)]="form.gpa" name="gpa" min="0" max="4" step="0.01" />
+            </div>
+            <!-- Enrollment Date -->
+            <div class="col-md-4">
+              <label class="form-label">Enrollment Date</label>
+              <input type="date" class="form-control" [(ngModel)]="form.enrollmentDate" name="enrollmentDate" />
+            </div>
+            <!-- Mobile -->
+            <div class="col-md-6">
+              <label class="form-label">Mobile</label>
+              <input type="text" class="form-control" [(ngModel)]="form.mobile" name="mobile" maxlength="20" />
+            </div>
+            <!-- Email -->
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" [(ngModel)]="form.email" name="email" maxlength="256" />
+            </div>
+            <!-- Country -->
+            <div class="col-md-4">
+              <label class="form-label">Country</label>
+              <input type="text" class="form-control" [(ngModel)]="form.country" name="country" maxlength="100" />
+            </div>
+            <!-- Region -->
+            <div class="col-md-4">
+              <label class="form-label">Region</label>
+              <input type="text" class="form-control" [(ngModel)]="form.region" name="region" maxlength="100" />
+            </div>
+            <!-- Address -->
+            <div class="col-md-4">
+              <label class="form-label">Address</label>
+              <input type="text" class="form-control" [(ngModel)]="form.address" name="address" maxlength="500" />
+            </div>
+            <!-- Notes -->
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <textarea class="form-control" [(ngModel)]="form.notes" name="notes" rows="2" maxlength="1000"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modalVisible = false">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="modalVisible" (click)="modalVisible = false"></div>

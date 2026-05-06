@@ -50,6 +50,11 @@
                 "glob": "dynamic-env.json",
                 "input": ".",
                 "output": "."
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor",
+                "output": "/assets/monaco/"
               }
             ],
             "styles": [
@@ -226,6 +231,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "ReportBuilder:build:production"

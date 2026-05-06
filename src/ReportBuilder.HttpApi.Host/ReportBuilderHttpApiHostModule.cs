@@ -44,6 +44,7 @@ using Volo.Abp.Swashbuckle;
 using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
 using Volo.Abp.Account.Public.Web.ExternalProviders;
+using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.Account.Public.Web;
 using Volo.Abp.Account.Public.Web.Impersonation;
 using Volo.Saas.Host;
@@ -100,7 +101,7 @@ public class ReportBuilderHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-        if (!configuration.GetValue<bool>("App:DisablePII"))
+if (!configuration.GetValue<bool>("App:DisablePII"))
         {
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogCompleteSecurityArtifact = true;
@@ -139,6 +140,7 @@ public class ReportBuilderHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureTheme();
+        ConfigureAntiForgery();
     }
     
     private void ConfigureTheme()
@@ -146,6 +148,17 @@ public class ReportBuilderHttpApiHostModule : AbpModule
         Configure<LeptonXThemeOptions>(options =>
         {
             options.DefaultStyle = LeptonXStyleNames.System;
+        });
+    }
+
+    private void ConfigureAntiForgery()
+    {
+        Configure<AbpAntiForgeryOptions>(options =>
+        {
+            options.AutoValidateIgnoredHttpMethods.Add("POST");
+            options.AutoValidateIgnoredHttpMethods.Add("PUT");
+            options.AutoValidateIgnoredHttpMethods.Add("DELETE");
+            options.AutoValidateIgnoredHttpMethods.Add("PATCH");
         });
     }
 

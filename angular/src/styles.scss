@@ -1,5 +1,54 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Fix DevExtreme DataGrid master-detail expand column — too narrow + icon invisible */
+.dx-command-expand {
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  cursor: pointer;
+}
+/* Force the expand/collapse icon to render when the theme doesn't provide it */
+.dx-datagrid-expand .dx-datagrid-group-closed,
+.dx-datagrid-expand .dx-datagrid-group-opened {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 20px !important;
+  width: 20px;
+  border-radius: 4px;
+  border: 1.5px solid #0d6efd;
+  margin: auto;
+  transition: background 0.15s;
+}
+.dx-datagrid-expand .dx-datagrid-group-closed::before {
+  content: '▶' !important;
+  font-size: 9px;
+  color: #0d6efd !important;
+  line-height: 1;
+}
+.dx-datagrid-expand .dx-datagrid-group-opened::before {
+  content: '▼' !important;
+  font-size: 9px;
+  color: #0d6efd !important;
+  line-height: 1;
+}
+.dx-datagrid-expand:hover .dx-datagrid-group-closed,
+.dx-datagrid-expand:hover .dx-datagrid-group-opened {
+  background: #0d6efd22;
+}
+
+/* Fix DevExtreme DataGrid group panel width:0 issue */
+.dx-datagrid-group-panel .dx-group-panel-message,
+.dx-datagrid .dx-toolbar-label .dx-toolbar-item-content {
+  width: auto !important;
+  min-width: 200px;
+  white-space: nowrap;
+}
+.dx-datagrid .dx-toolbar-item.dx-toolbar-label {
+  max-width: none !important;
+  width: auto !important;
+}
+
 
 :root .lpx-theme-dark {
   .abp-support {

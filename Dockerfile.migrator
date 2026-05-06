@@ -1,0 +1,25 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Project-level shared props and ABP Commercial NuGet feed
+COPY common.props .
+COPY NuGet.Config .
+
+# Copy project files first for layer caching
+COPY src/ReportBuilder.Domain.Shared/ReportBuilder.Domain.Shared.csproj                 src/ReportBuilder.Domain.Shared/
+COPY src/ReportBuilder.Domain/ReportBuilder.Domain.csproj                               src/ReportBuilder.Domain/
+COPY src/ReportBuilder.Application.Contracts/ReportBuilder.Application.Contracts.csproj src/ReportBuilder.Application.Contracts/
+COPY src/ReportBuilder.EntityFrameworkCore/ReportBuilder.EntityFrameworkCore.csproj     src/ReportBuilder.EntityFrameworkCore/
+COPY src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj                       src/ReportBuilder.DbMigrator/
+
+RUN dotnet restore src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj
+
+COPY src/ src/
+
+RUN dotnet publish src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj \
+    -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "ReportBuilder.DbMigrator.dll"]

@@ -1,5 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using ReportBuilder.Reports;
+using ReportBuilder.Students;
 using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -53,6 +55,8 @@ public class ReportBuilderEntityFrameworkCoreModule : AbpModule
                 /* Remove "includeAllEntities: true" to create
                  * default repositories only for aggregate roots */
             options.AddDefaultRepositories(includeAllEntities: true);
+            options.AddRepository<ReportDefinition, EfCoreReportRepository>();
+            options.AddRepository<Student, EfCoreStudentRepository>();
         });
 
         if (AbpStudioAnalyzeHelper.IsInAnalyzeMode)

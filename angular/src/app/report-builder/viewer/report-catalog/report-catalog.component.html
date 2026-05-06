@@ -1,0 +1,37 @@
+<div class="container-fluid py-3">
+  <h3 class="mb-4">Available Reports</h3>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div *ngIf="!loading && !reports.length" class="text-center text-muted py-5">
+    No reports are available.
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-4" *ngFor="let report of reports">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ report.name }}</h5>
+          <p class="card-text text-muted small">{{ report.description || 'No description.' }}</p>
+          <span class="badge bg-secondary mb-2">{{ getDisplayModeLabel(report.displayMode) }}</span>
+        </div>
+        <div class="card-footer bg-transparent d-flex gap-2">
+          <button
+            *ngIf="report.displayMode !== 1"
+            class="btn btn-sm btn-outline-primary"
+            (click)="viewGrid(report.id)">
+            <i class="fa fa-table me-1"></i> View Grid
+          </button>
+          <button
+            *ngIf="report.displayMode !== 0"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="viewReport(report.id)">
+            <i class="fa fa-file-pdf me-1"></i> View Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

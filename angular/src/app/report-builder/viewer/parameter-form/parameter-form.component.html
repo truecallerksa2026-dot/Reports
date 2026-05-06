@@ -1,0 +1,39 @@
+<div *ngIf="parameters.length" class="card mb-3">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3" *ngFor="let param of parameters">
+        <label class="form-label">
+          {{ param.displayName }}
+          <span *ngIf="param.isRequired" class="text-danger">*</span>
+        </label>
+
+        <input *ngIf="param.dataType === ParameterDataType.String"
+          type="text" class="form-control form-control-sm"
+          [(ngModel)]="values[param.parameterName.replace('@', '')]"
+          [placeholder]="param.displayName" />
+
+        <input *ngIf="param.dataType === ParameterDataType.Number"
+          type="number" class="form-control form-control-sm"
+          [(ngModel)]="values[param.parameterName.replace('@', '')]" />
+
+        <input *ngIf="param.dataType === ParameterDataType.Date"
+          type="date" class="form-control form-control-sm"
+          [(ngModel)]="values[param.parameterName.replace('@', '')]" />
+
+        <select *ngIf="param.dataType === ParameterDataType.Bool"
+          class="form-select form-select-sm"
+          [(ngModel)]="values[param.parameterName.replace('@', '')]">
+          <option [ngValue]="null">-- Any --</option>
+          <option [ngValue]="true">Yes</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <button class="btn btn-primary btn-sm w-100" (click)="onApply()">
+          <i class="fa fa-filter me-1"></i> Apply
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

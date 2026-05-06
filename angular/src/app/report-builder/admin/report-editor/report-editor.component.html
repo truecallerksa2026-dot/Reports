@@ -1,0 +1,472 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{ isNew ? 'New Report' : 'Edit Report: ' + report.name }}</h3>
+  </div>
+  <div class="card-body">
+
+    <!-- Tabs navigation -->
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'general'" (click)="activeTab = 'general'" href="javascript:void(0)">General</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'sql'" (click)="activeTab = 'sql'" href="javascript:void(0)">SQL Query</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'columns'" (click)="activeTab = 'columns'" href="javascript:void(0)">
+          Columns <span class="badge bg-secondary ms-1">{{ report.columns?.length || 0 }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'permissions'" (click)="activeTab = 'permissions'" href="javascript:void(0)">Permissions</a>
+      </li>
+    </ul>
+
+    <!-- ── General Tab ───────────────────────────────────────────────── -->
+    <div [hidden]="activeTab !== 'general'">
+      <div class="mb-3">
+        <label class="form-label">Name <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" [(ngModel)]="report.name" maxlength="256" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" [(ngModel)]="report.description" rows="3"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Display Mode</label>
+        <select class="form-select" [(ngModel)]="report.displayMode">
+          <option *ngFor="let m of displayModes" [value]="m.value">{{ m.label }}</option>
+        </select>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isActive" [(ngModel)]="report.isActive" />
+        <label class="form-check-label" for="isActive">Active</label>
+      </div>
+    </div>
+
+    <!-- ── SQL Tab ───────────────────────────────────────────────────── -->
+    <div [hidden]="activeTab !== 'sql'">
+      <div class="mb-2 d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" (click)="discoverColumns()" [disabled]="discoveringColumns">
+          <span *ngIf="discoveringColumns" class="spinner-border spinner-border-sm me-1"></span>
+          <i *ngIf="!discoveringColumns" class="fa fa-search me-1"></i>
+          Discover Columns
+        </button>
+        <small class="text-muted align-self-center">Use @paramName for user parameters (e.g., @startDate)</small>
+      </div>
+      <ngx-monaco-editor
+        [options]="monacoOptions"
+        [(ngModel)]="report.sqlQuery"
+        style="height: 400px; display: block;">
+      </ngx-monaco-editor>
+    </div>
+
+    <!-- ── Columns Tab ───────────────────────────────────────────────── -->
+    <div [hidden]="activeTab !== 'columns'">
+      <p *ngIf="!report.columns?.length" class="text-muted">
+        No columns discovered yet. Go to the SQL tab and click "Discover Columns".
+      </p>
+
+      <div *ngIf="report.columns?.length">
+
+        <!-- Toolbar -->
+        <div class="col-editor-toolbar d-flex align-items-center gap-2 mb-3">
+          <div class="d-flex gap-1 flex-wrap">
+            <span class="type-chip type-string">String</span>
+            <span class="type-chip type-number">Number</span>
+            <span class="type-chip type-date">Date</span>
+            <span class="type-chip type-bool">Bool</span>
+          </div>
+          <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" (click)="fixDisplayNames()" title="Re-format all Display Names from field names">
+              <i class="fa fa-magic me-1"></i> Fix Display Names
+            </button>
+          </div>
+        </div>
+
+        <dx-data-grid
+          [dataSource]="report.columns"
+          [showBorders]="true"
+          [showRowLines]="true"
+          [showColumnLines]="false"
+          [rowAlternationEnabled]="true"
+          [columnAutoWidth]="false"
+          [paging]="{ enabled: false }"
+          [scrolling]="{ mode: 'virtual' }"
+          [editing]="{ mode: 'row', allowUpdating: true }">
+
+          <!-- Field — read-only code chip -->
+          <dxi-column
+            dataField="fieldName"
+            caption="Field"
+            [allowEditing]="false"
+            [width]="180"
+            cellTemplate="fieldTpl">
+          </dxi-column>
+
+          <!-- Display Name -->
+          <dxi-column dataField="displayName" caption="Display Name" [width]="190"></dxi-column>
+
+          <!-- Type chip -->
+          <dxi-column dataField="dataType" caption="Type" [width]="110" cellTemplate="typeTpl">
+            <dxo-lookup
+              [dataSource]="[{v:0,t:'String'},{v:1,t:'Number'},{v:2,t:'Date'},{v:3,t:'Bool'}]"
+              valueExpr="v" displayExpr="t">
+            </dxo-lookup>
+          </dxi-column>
+
+          <!-- Reorder ▲▼ template -->
+          <div *dxTemplate="let cell of 'reorderTpl'" class="reorder-btns">
+            <button class="reorder-btn" title="Move up"   (click)="moveUp(cell.data)">▲</button>
+            <button class="reorder-btn" title="Move down" (click)="moveDown(cell.data)">▼</button>
+          </div>
+
+          <!-- Boolean toggles via native checkbox templates -->
+          <dxi-column dataField="isVisible"    caption="Visible"    [allowEditing]="false" [width]="76"  cellTemplate="visibleTpl"></dxi-column>
+          <dxi-column dataField="isFilterable" caption="Filterable" [allowEditing]="false" [width]="84"  cellTemplate="filterableTpl"></dxi-column>
+          <dxi-column dataField="isSortable"   caption="Sortable"   [allowEditing]="false" [width]="76"  cellTemplate="sortableTpl"></dxi-column>
+          <dxi-column dataField="isGroupable"  caption="Groupable"  [allowEditing]="false" [width]="84"  cellTemplate="groupableTpl"></dxi-column>
+
+          <dxi-column dataField="displayOrder" caption="Order" dataType="number" [width]="65" sortOrder="asc"></dxi-column>
+          <dxi-column dataField="width"        caption="Width" dataType="number" [width]="65"></dxi-column>
+
+          <!-- Reorder buttons -->
+          <dxi-column caption="" [allowEditing]="false" [allowSorting]="false" [width]="60" cellTemplate="reorderTpl"></dxi-column>
+
+          <!-- Master-detail: per-column role permissions -->
+          <dxo-master-detail [enabled]="true" template="colPermDetail"></dxo-master-detail>
+          <div *dxTemplate="let master of 'colPermDetail'">
+            <div class="col-perm-panel">
+              <div class="col-perm-header">
+                <i class="fa fa-shield-alt me-1"></i>
+                Role Overrides for <strong>{{ master.data.fieldName }}</strong>
+                <span class="text-muted small ms-2">
+                  — override default visibility for specific roles
+                </span>
+              </div>
+
+              <!-- Empty state -->
+              <div *ngIf="!master.data.columnPermissions?.length" class="col-perm-empty">
+                No role overrides. Default visibility applies to all roles.
+              </div>
+
+              <!-- Role override rows -->
+              <div class="col-perm-list" *ngIf="master.data.columnPermissions?.length">
+                <div class="col-perm-row col-perm-labels">
+                  <span class="col-perm-role-lbl">Role Name</span>
+                  <span class="col-perm-flag-lbl">Visible</span>
+                  <span class="col-perm-flag-lbl">Filterable</span>
+                  <span></span>
+                </div>
+                <div class="col-perm-row" *ngFor="let perm of master.data.columnPermissions; let i = index">
+                  <select class="form-select form-select-sm col-perm-role-input"
+                    [(ngModel)]="perm.roleName"
+                    [name]="'cpRole_' + master.data.fieldName + '_' + i">
+                    <option value="">— select role —</option>
+                    <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+                  </select>
+                  <label class="col-perm-toggle">
+                    <input type="checkbox" [checked]="perm.isVisible !== false"
+                      (change)="perm.isVisible = $any($event.target).checked" />
+                    <span class="col-perm-slider"></span>
+                  </label>
+                  <label class="col-perm-toggle">
+                    <input type="checkbox" [checked]="perm.isFilterable !== false"
+                      (change)="perm.isFilterable = $any($event.target).checked" />
+                    <span class="col-perm-slider"></span>
+                  </label>
+                  <button class="col-perm-rm" (click)="removeColPerm(master.data, i)" title="Remove">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button class="btn btn-outline-primary btn-sm mt-2" (click)="addColPerm(master.data)">
+                <i class="fa fa-plus me-1"></i> Add Role Override
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Cell templates ── -->
+
+          <div *dxTemplate="let cell of 'fieldTpl'">
+            <code class="field-code">{{ cell.value }}</code>
+          </div>
+
+          <div *dxTemplate="let cell of 'typeTpl'">
+            <span class="type-chip"
+              [class.type-string]="cell.value === 0"
+              [class.type-number]="cell.value === 1"
+              [class.type-date]="cell.value === 2"
+              [class.type-bool]="cell.value === 3">
+              {{ cell.value === 0 ? 'String' : cell.value === 1 ? 'Number' : cell.value === 2 ? 'Date' : 'Bool' }}
+            </span>
+          </div>
+
+          <div *dxTemplate="let cell of 'visibleTpl'" class="toggle-cell">
+            <label class="toggle">
+              <input type="checkbox" [checked]="cell.data.isVisible"
+                (change)="cell.data.isVisible = $any($event.target).checked" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div *dxTemplate="let cell of 'filterableTpl'" class="toggle-cell">
+            <label class="toggle">
+              <input type="checkbox" [checked]="cell.data.isFilterable"
+                (change)="cell.data.isFilterable = $any($event.target).checked" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div *dxTemplate="let cell of 'sortableTpl'" class="toggle-cell">
+            <label class="toggle">
+              <input type="checkbox" [checked]="cell.data.isSortable"
+                (change)="cell.data.isSortable = $any($event.target).checked" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div *dxTemplate="let cell of 'groupableTpl'" class="toggle-cell">
+            <label class="toggle">
+              <input type="checkbox" [checked]="cell.data.isGroupable"
+                (change)="cell.data.isGroupable = $any($event.target).checked" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+        </dx-data-grid>
+      </div>
+    </div>
+
+    <!-- ── Permissions Tab ──────────────────────────────────────────── -->
+    <div [hidden]="activeTab !== 'permissions'">
+      <div class="perm-section">
+        <p class="text-muted small mb-3">
+          <i class="fa fa-info-circle me-1"></i>
+          Restrict this report to specific roles. Leave empty to allow <strong>all authenticated users</strong>.
+        </p>
+
+        <!-- Empty state -->
+        <div *ngIf="!report.permissions?.length" class="perm-empty">
+          <i class="fa fa-unlock-alt"></i>
+          <p>No role restrictions — all authenticated users can access this report.</p>
+        </div>
+
+        <!-- Role rows -->
+        <div *ngIf="report.permissions?.length" class="perm-list mb-3">
+          <div class="perm-row" *ngFor="let perm of report.permissions; let i = index">
+            <i class="fa fa-shield-alt perm-icon"></i>
+            <select class="form-select form-select-sm perm-input"
+              [(ngModel)]="perm.roleName" [name]="'roleName_' + i">
+              <option value="">— select role —</option>
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+            <label class="perm-toggle-label">
+              <input type="checkbox" [(ngModel)]="perm.canExport" [name]="'export_' + i" />
+              <span class="perm-toggle-text">Can Export</span>
+            </label>
+            <button class="perm-remove" (click)="removePermission(i)" title="Remove">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-outline-primary btn-sm" (click)="addPermission()">
+          <i class="fa fa-plus me-1"></i> Add Role
+        </button>
+      </div>
+    </div>
+
+    <!-- Form actions -->
+    <div class="mt-4 d-flex gap-2">
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+        <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+        {{ isNew ? 'Create' : 'Save Changes' }}
+      </button>
+      <button class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Field name chip ────────────────────────────────────────────── */
+.field-code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.78rem;
+  background: #f1f3f5;
+  color: #495057;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+/* ── Type chips ─────────────────────────────────────────────────── */
+.type-chip {
+  display: inline-block;
+  font-size: 0.71rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.type-string { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.type-number { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.type-date   { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.type-bool   { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+
+/* ── Toggle switch ──────────────────────────────────────────────── */
+.toggle-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #ced4da;
+  border-radius: 18px;
+  transition: background 0.18s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.18s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle input:checked + .toggle-slider {
+  background: #0d6efd;
+}
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(16px);
+}
+
+/* ── Column permission master-detail ────────────────────────────── */
+.col-perm-panel {
+  padding: 14px 20px 16px;
+  background: #f8fafc;
+  border-top: 2px solid #e0e7ff;
+}
+.col-perm-header {
+  font-size: .85rem; font-weight: 600; color: #1e40af; margin-bottom: 12px;
+}
+.col-perm-empty {
+  font-size: .8rem; color: #9ca3af; font-style: italic; margin-bottom: 8px;
+}
+.col-perm-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.col-perm-labels { color: #6b7280; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.col-perm-row {
+  display: grid;
+  grid-template-columns: 200px 60px 80px 28px;
+  align-items: center;
+  gap: 10px;
+}
+.col-perm-role-lbl { }
+.col-perm-flag-lbl { text-align: center; }
+.col-perm-role-input { }
+
+/* mini toggle switch for column perms */
+.col-perm-toggle {
+  position: relative; display: inline-block; width: 34px; height: 18px; margin: 0 auto; cursor: pointer;
+}
+.col-perm-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.col-perm-slider {
+  position: absolute; inset: 0; background: #ced4da; border-radius: 18px; transition: background .18s;
+}
+.col-perm-slider::before {
+  content: ''; position: absolute; width: 12px; height: 12px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; transition: transform .18s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.col-perm-toggle input:checked + .col-perm-slider { background: #0d6efd; }
+.col-perm-toggle input:checked + .col-perm-slider::before { transform: translateX(16px); }
+
+.col-perm-rm {
+  background: none; border: none; color: #9ca3af; cursor: pointer;
+  font-size: .75rem; border-radius: 4px; padding: 2px 4px; transition: color .15s;
+}
+.col-perm-rm:hover { color: #dc2626; }
+
+/* ── Permissions tab ────────────────────────────────────────────── */
+.perm-section { max-width: 560px; }
+.perm-empty {
+  text-align: center; padding: 32px 16px;
+  color: #9ca3af; border: 2px dashed #e5e7eb; border-radius: 8px;
+}
+.perm-empty i { font-size: 2rem; display: block; margin-bottom: 8px; }
+.perm-list { display: flex; flex-direction: column; gap: 8px; }
+.perm-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #f8f9fa; border: 1px solid #e9ecef;
+  border-radius: 8px; padding: 8px 12px;
+}
+.perm-icon { color: #6b7280; font-size: .85rem; flex-shrink: 0; }
+.perm-input { flex: 1; min-width: 0; }
+.perm-toggle-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap; font-size: .8rem; color: #374151; cursor: pointer;
+  flex-shrink: 0;
+}
+.perm-toggle-label input { cursor: pointer; accent-color: #0d6efd; }
+.perm-remove {
+  background: none; border: none; color: #9ca3af;
+  font-size: .8rem; cursor: pointer; padding: 2px 4px; border-radius: 4px;
+  flex-shrink: 0; transition: color .15s;
+}
+.perm-remove:hover { color: #dc2626; }
+
+/* ── Reorder buttons ────────────────────────────────────────────── */
+.reorder-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.reorder-btn {
+  background: none;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  padding: 0 5px;
+  font-size: 0.65rem;
+  line-height: 1.4;
+  color: #6c757d;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.reorder-btn:hover {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────────── */
+.col-editor-toolbar {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+</style>
