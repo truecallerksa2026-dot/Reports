@@ -1,11 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Project-level shared props and ABP Commercial NuGet feed
 COPY common.props .
 COPY NuGet.Config .
 
-# Copy project files first for layer caching
 COPY src/ReportBuilder.Domain.Shared/ReportBuilder.Domain.Shared.csproj                 src/ReportBuilder.Domain.Shared/
 COPY src/ReportBuilder.Domain/ReportBuilder.Domain.csproj                               src/ReportBuilder.Domain/
 COPY src/ReportBuilder.Application.Contracts/ReportBuilder.Application.Contracts.csproj src/ReportBuilder.Application.Contracts/
@@ -21,31 +19,34 @@ RUN dotnet restore src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csp
 
 COPY src/ src/
 
-# Create empty secrets files so MSBuild Copy task doesn't fail (real config is env vars)
 RUN echo '{}' > src/ReportBuilder.DbMigrator/appsettings.secrets.json && \
     echo '{}' > src/ReportBuilder.HttpApi.Host/appsettings.secrets.json
 
+# Generate OpenIddict signing certificate using openssl (same approach as ITSM)
+RUN if [ ! -f "src/ReportBuilder.HttpApi.Host/openiddict.pfx" ]; then \
+    apt-get update -qq && apt-get install -y -qq openssl && \
+    openssl req -x509 -newkey rsa:2048 -keyout /tmp/oidc.key -out /tmp/oidc.crt -days 3650 -nodes -subj '/CN=ReportBuilder' && \
+    openssl pkcs12 -export -out src/ReportBuilder.HttpApi.Host/openiddict.pfx \
+        -inkey /tmp/oidc.key -in /tmp/oidc.crt \
+        -passout pass:fd092b11-86a2-4a31-9949-875ac31369ce; \
+fi
+
 RUN dotnet publish src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj \
-    -c Release -o /app/publish --no-restore
+    -c Release -o /app/api --no-restore
 
 RUN dotnet publish src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj \
     -c Release -o /app/migrator --no-restore
 
-# Generate OpenIddict signing cert AFTER publishing, directly into the publish output directory.
-# COPY --from=build /app/publish . places it at /app/openiddict.pfx in the final image.
-# AddProductionEncryptionAndSigningCertificate() reads it from the working directory at runtime.
-RUN dotnet dev-certs https -ep /app/publish/openiddict.pfx \
-    -p fd092b11-86a2-4a31-9949-875ac31369ce
-
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-COPY --from=build /app/publish .
-COPY --from=build /app/migrator ./migrator/
 
-# Startup script: use Railway's PORT variable (set PORT=80 in Railway service variables).
-# cd back to /app so openiddict.pfx is found at the correct relative path.
-RUN printf '#!/bin/sh\nset -e\nexport ASPNETCORE_URLS=http://+:${PORT:-80}\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\ncd /app\nexec dotnet ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
+COPY --from=build /app/api ./api
+COPY --from=build /app/migrator ./migrator
+
+RUN printf '#!/bin/sh\nset -e\nexport ASPNETCORE_URLS=http://+:${PORT:-80}\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Starting API..."\ncd /app/api && exec dotnet ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh \
+    && chmod +x /app/start.sh
 
 ENV ASPNETCORE_ENVIRONMENT=Docker
 EXPOSE 80
+
 ENTRYPOINT ["/app/start.sh"]
