@@ -39,9 +39,12 @@ public class ReportExecutionAppService : ApplicationService, IReportExecutionApp
         if (!report.IsActive)
             throw new UserFriendlyException("This report is not active.");
 
-        // Check report-level permission
+        // Admins bypass per-report role restrictions
+        var isAdmin = await AuthorizationService.IsGrantedAsync(ReportBuilderPermissions.Reports.Admin.Default);
+
+        // Check report-level permission for non-admins
         var userRoles = CurrentUser.Roles ?? Array.Empty<string>();
-        var hasAccess = !report.Permissions.Any() ||
+        var hasAccess = isAdmin || !report.Permissions.Any() ||
                         report.Permissions.Any(p => userRoles.Contains(p.RoleName, StringComparer.OrdinalIgnoreCase));
         if (!hasAccess)
             throw new AbpAuthorizationException("You do not have access to this report.");
@@ -51,7 +54,8 @@ public class ReportExecutionAppService : ApplicationService, IReportExecutionApp
         var visibleFieldNames = visibleColumns.Select(c => c.FieldName).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var connectionString = _configuration.GetConnectionString("ReadOnly")
-            ?? throw new UserFriendlyException("ReadOnly connection string not configured.");
+            ?? _configuration.GetConnectionString("Default")
+            ?? throw new UserFriendlyException("No database connection string configured.");
 
         await using var connection = new NpgsqlConnection(connectionString);
 
