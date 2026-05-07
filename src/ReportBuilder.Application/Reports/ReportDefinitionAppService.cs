@@ -111,7 +111,8 @@ public class ReportDefinitionAppService : ApplicationService, IReportDefinitionA
     {
         _sqlValidator.Validate(sqlQuery);
         var connectionString = _configuration.GetConnectionString("ReadOnly")
-            ?? throw new UserFriendlyException("ReadOnly connection string not configured.");
+            ?? _configuration.GetConnectionString("Default")
+            ?? throw new UserFriendlyException("No database connection string configured.");
 
         await using var connection = new NpgsqlConnection(connectionString);
 
