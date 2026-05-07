@@ -266,8 +266,9 @@ src/ReportBuilder.DbMigrator/Logs/*
 src/ReportBuilder.Blazor.Server/Logs/*
 src/ReportBuilder.Blazor.Server.Tiered/Logs/*
 
-# Use abp install-libs to restore.
-**/wwwroot/libs/*
+# wwwroot/libs committed to repo so Railway Docker builds have the assets.
+# Run `abp install-libs` locally to update them.
+# **/wwwroot/libs/*
 
 # IdentityServer temp files
 tempkey.rsa
