@@ -1,0 +1,63 @@
+@use '@angular/material' as mat;
+
+// Define a custom Material theme that harmonizes with LeptonX's primary blue (#0d6efd).
+// Using M3 theme system (Angular Material v17+).
+$light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$blue-palette,
+    tertiary: mat.$orange-palette,
+  ),
+  typography: (
+    // Inherit font stack from LeptonX — do not override body/heading fonts globally
+    use-system-variables: true,
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$blue-palette,
+    tertiary: mat.$orange-palette,
+  ),
+  typography: (
+    use-system-variables: true,
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+// Scope ALL Material component styles under .mat-app-scope.
+// This prevents any leakage into ABP/LeptonX pages that never get this class.
+.mat-app-scope {
+  @include mat.all-component-themes($light-theme);
+}
+
+// LeptonX dark mode compatibility: apply dark theme when LeptonX sets lpx-theme-dark on body
+.lpx-theme-dark .mat-app-scope {
+  @include mat.all-component-colors($dark-theme);
+}
+
+// LeptonX dim mode compatibility
+.lpx-theme-dim .mat-app-scope {
+  @include mat.all-component-colors($dark-theme);
+}
+
+// CDK overlay container hosts dialogs, snackbars, select dropdowns, datepicker popups.
+// These render at document body level outside any Angular component tree,
+// so they need Material styles applied directly here.
+.cdk-overlay-container {
+  @include mat.all-component-themes($light-theme);
+
+  // Ensure overlays layer above LeptonX sidebar/header z-index values
+  z-index: 1060;
+}
+
+.lpx-theme-dark .cdk-overlay-container,
+.lpx-theme-dim .cdk-overlay-container {
+  @include mat.all-component-colors($dark-theme);
+}
