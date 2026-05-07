@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { EnvironmentService } from '@abp/ng.core';
 import {
   ReportDefinitionDto,
   ReportDefinitionSummaryDto,
@@ -14,9 +15,11 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
-  private readonly baseUrl = '/api/report-builder/reports';
+  private get baseUrl(): string {
+    return this.environment.getApiUrl('default') + '/api/report-builder/reports';
+  }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private environment: EnvironmentService) {}
 
   getList(input: GetReportListInput = {}): Observable<PagedResult<ReportDefinitionSummaryDto>> {
     return this.http.get<PagedResult<ReportDefinitionSummaryDto>>(this.baseUrl, {
@@ -58,7 +61,7 @@ export class ReportService {
 
   getRoles(): Observable<{ items: Array<{ name: string }>; totalCount: number }> {
     return this.http.get<{ items: Array<{ name: string }>; totalCount: number }>(
-      '/api/identity/roles?maxResultCount=1000'
+      this.environment.getApiUrl('default') + '/api/identity/roles?maxResultCount=1000'
     );
   }
 }

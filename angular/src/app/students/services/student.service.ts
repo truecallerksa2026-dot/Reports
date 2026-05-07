@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { EnvironmentService } from '@abp/ng.core';
 import {
   StudentDto,
   StudentSummaryDto,
@@ -11,9 +12,11 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
-  private readonly baseUrl = '/api/report-builder/students';
+  private get baseUrl(): string {
+    return this.environment.getApiUrl('default') + '/api/report-builder/students';
+  }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private environment: EnvironmentService) {}
 
   getList(input: GetStudentListInput = {}): Observable<PagedResult<StudentSummaryDto>> {
     const params: any = {};

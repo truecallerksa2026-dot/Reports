@@ -132,10 +132,6 @@ export class StudentListComponent implements OnInit {
     }
   }
 
-  onPageChange(e: any): void {
-    this.loadStudents(e.skip, e.take);
-  }
-
   private emptyForm(): CreateUpdateStudentDto {
     const today = new Date().toISOString().substring(0, 10);
     return {
