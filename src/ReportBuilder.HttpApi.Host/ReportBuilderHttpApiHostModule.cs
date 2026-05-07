@@ -101,6 +101,11 @@ public class ReportBuilderHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
+        Configure<Volo.Abp.AspNetCore.Mvc.Libs.AbpMvcLibsOptions>(options =>
+        {
+            options.CheckLibs = false;
+        });
+
 if (!configuration.GetValue<bool>("App:DisablePII"))
         {
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
