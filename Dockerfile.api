@@ -21,6 +21,10 @@ RUN dotnet restore src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csp
 
 COPY src/ src/
 
+# Create empty secrets files so MSBuild Copy task doesn't fail (real config is env vars)
+RUN echo '{}' > src/ReportBuilder.DbMigrator/appsettings.secrets.json && \
+    echo '{}' > src/ReportBuilder.HttpApi.Host/appsettings.secrets.json
+
 RUN dotnet publish src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj \
     -c Release -o /app/publish --no-restore
 
