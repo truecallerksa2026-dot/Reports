@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using ReportBuilder.Permissions;
-using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
+using Volo.Abp.PermissionManagement;
 
 namespace ReportBuilder;
 
