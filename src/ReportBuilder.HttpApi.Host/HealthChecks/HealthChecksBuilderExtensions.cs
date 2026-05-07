@@ -23,7 +23,7 @@ public static class HealthChecksBuilderExtensions
 
         if (string.IsNullOrEmpty(healthCheckUrl))
         {
-            healthCheckUrl = "/health-status";
+            healthCheckUrl = "http://localhost/health-status";
         }
 
         var healthChecksUiBuilder = services.AddHealthChecksUI(settings =>
