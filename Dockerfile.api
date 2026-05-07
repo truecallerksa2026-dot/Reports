@@ -42,11 +42,10 @@ WORKDIR /app
 COPY --from=build /app/publish .
 COPY --from=build /app/migrator ./migrator/
 
-# Startup script: run migrator then cd back to /app before starting the API.
-# The cd back is critical — openiddict.pfx is at /app/openiddict.pfx and
-# AddProductionEncryptionAndSigningCertificate uses a relative path lookup.
-RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\ncd /app\nexec dotnet ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
+# Startup script: use Railway's PORT variable (set PORT=80 in Railway service variables).
+# cd back to /app so openiddict.pfx is found at the correct relative path.
+RUN printf '#!/bin/sh\nset -e\nexport ASPNETCORE_URLS=http://+:${PORT:-80}\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\ncd /app\nexec dotnet ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
 
+ENV ASPNETCORE_ENVIRONMENT=Docker
 EXPOSE 80
-ENV ASPNETCORE_URLS=http://+:80
 ENTRYPOINT ["/app/start.sh"]
