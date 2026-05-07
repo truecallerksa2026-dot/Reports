@@ -25,15 +25,17 @@ COPY src/ src/
 RUN echo '{}' > src/ReportBuilder.DbMigrator/appsettings.secrets.json && \
     echo '{}' > src/ReportBuilder.HttpApi.Host/appsettings.secrets.json
 
+# Generate OpenIddict signing cert BEFORE publishing so the csproj embeds it as an EmbeddedResource.
+# The csproj has: <EmbeddedResource Include="openiddict.pfx" Condition="Exists('./openiddict.pfx')" />
+# AddProductionEncryptionAndSigningCertificate() loads it from the embedded resource at runtime.
+RUN dotnet dev-certs https -ep src/ReportBuilder.HttpApi.Host/openiddict.pfx \
+    -p fd092b11-86a2-4a31-9949-875ac31369ce
+
 RUN dotnet publish src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj \
     -c Release -o /app/publish --no-restore
 
 RUN dotnet publish src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj \
     -c Release -o /app/migrator --no-restore
-
-# Generate OpenIddict signing cert (used in Production environment mode)
-RUN dotnet dev-certs https -ep /app/publish/openiddict.pfx \
-    -p fd092b11-86a2-4a31-9949-875ac31369ce
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
