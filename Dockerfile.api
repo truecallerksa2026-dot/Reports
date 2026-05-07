@@ -14,13 +14,18 @@ COPY src/ReportBuilder.EntityFrameworkCore/ReportBuilder.EntityFrameworkCore.csp
 COPY src/ReportBuilder.HttpApi/ReportBuilder.HttpApi.csproj                             src/ReportBuilder.HttpApi/
 COPY src/ReportBuilder.HttpApi.Client/ReportBuilder.HttpApi.Client.csproj               src/ReportBuilder.HttpApi.Client/
 COPY src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj                   src/ReportBuilder.HttpApi.Host/
+COPY src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj                       src/ReportBuilder.DbMigrator/
 
-RUN dotnet restore src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj
+RUN dotnet restore src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj && \
+    dotnet restore src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj
 
 COPY src/ src/
 
 RUN dotnet publish src/ReportBuilder.HttpApi.Host/ReportBuilder.HttpApi.Host.csproj \
     -c Release -o /app/publish --no-restore
+
+RUN dotnet publish src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj \
+    -c Release -o /app/migrator --no-restore
 
 # Generate OpenIddict signing cert (used in Production environment mode)
 RUN dotnet dev-certs https -ep /app/publish/openiddict.pfx \
@@ -29,5 +34,10 @@ RUN dotnet dev-certs https -ep /app/publish/openiddict.pfx \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+COPY --from=build /app/migrator ./migrator/
+
+# Startup script: run migrator then start the API
+RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\nexec dotnet /app/ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
+
 ENV ASPNETCORE_URLS=http://+:80
-ENTRYPOINT ["dotnet", "ReportBuilder.HttpApi.Host.dll"]
+ENTRYPOINT ["/app/start.sh"]
