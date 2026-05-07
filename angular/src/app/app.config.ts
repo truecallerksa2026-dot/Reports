@@ -19,6 +19,7 @@ import { provideSideMenuLayout } from '@volosoft/abp.ng.theme.lepton-x/layouts';
 import { provideLogo, withEnvironmentOptions } from "@abp/ng.theme.shared";
 import { ApplicationConfig } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { provideRouter } from '@angular/router';
 import { environment } from '../environments/environment';
 import { APP_ROUTES } from './app.routes';
@@ -28,6 +29,7 @@ import { FOOTER_PROVIDER } from './footer/footer.config';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(APP_ROUTES),
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     APP_ROUTE_PROVIDER,
     FOOTER_PROVIDER,
     provideAnimations(),

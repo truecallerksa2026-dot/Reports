@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DxDataGridModule, DxButtonModule } from 'devextreme-angular';
+import { AppMaterialModule } from '../shared/material.module';
 import { StudentsRoutingModule } from './students-routing.module';
 import { StudentListComponent } from './student-list/student-list.component';
 
@@ -15,6 +16,7 @@ import { StudentListComponent } from './student-list/student-list.component';
     DxDataGridModule,
     DxButtonModule,
     StudentsRoutingModule,
+    AppMaterialModule,
   ],
 })
 export class StudentsModule {}

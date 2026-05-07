@@ -190,6 +190,7 @@
               },
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "node_modules/cropperjs/dist/cropper.css",
+              "src/material-theme.scss",
               "src/styles.scss"
             ],
             "scripts": [],

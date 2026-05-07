@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DxDataGridModule, DxButtonModule } from 'devextreme-angular';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { AppMaterialModule } from '../shared/material.module';
 import { ReportBuilderRoutingModule } from './report-builder-routing.module';
 import { ReportListComponent } from './admin/report-list/report-list.component';
 import { ReportEditorComponent } from './admin/report-editor/report-editor.component';
@@ -27,6 +28,7 @@ import { ReportViewerComponent } from './viewer/report-viewer/report-viewer.comp
     DxButtonModule,
     MonacoEditorModule.forRoot(),
     ReportBuilderRoutingModule,
+    AppMaterialModule,
   ],
 })
 export class ReportBuilderModule {}
