@@ -47,5 +47,6 @@ COPY --from=build /app/migrator ./migrator/
 # AddProductionEncryptionAndSigningCertificate uses a relative path lookup.
 RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\ncd /app\nexec dotnet ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
 
+EXPOSE 80
 ENV ASPNETCORE_URLS=http://+:80
 ENTRYPOINT ["/app/start.sh"]
