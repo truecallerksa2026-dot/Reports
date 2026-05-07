@@ -107,7 +107,6 @@ public class ReportDefinitionAppService : ApplicationService, IReportDefinitionA
         return ObjectMapper.Map<ReportDefinition, ReportDefinitionDto>(report);
     }
 
-    [Authorize(ReportBuilderPermissions.Reports.Admin.TestRun)]
     public async Task<List<ReportColumnDto>> DiscoverColumnsAsync(string sqlQuery)
     {
         _sqlValidator.Validate(sqlQuery);
