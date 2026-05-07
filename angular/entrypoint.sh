@@ -9,6 +9,10 @@ set -e
 API_URL="${API_URL:-https://localhost:44356}"
 APP_URL="${APP_URL:-http://localhost:4200}"
 
+# Railway assigns a dynamic port via $PORT. Update nginx to listen on it.
+LISTEN_PORT="${PORT:-80}"
+sed -i "s/listen\s*80;/listen ${LISTEN_PORT};/g; s/listen\s*\[::\]:80;/listen [::]:${LISTEN_PORT};/g" /etc/nginx/conf.d/default.conf
+
 cat > /usr/share/nginx/html/dynamic-env.json << ENVEOF
 {
   "production": true,
