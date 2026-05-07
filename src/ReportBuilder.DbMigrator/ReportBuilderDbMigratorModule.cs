@@ -7,7 +7,8 @@ namespace ReportBuilder.DbMigrator;
 [DependsOn(
     typeof(AbpAutofacModule),
     typeof(ReportBuilderEntityFrameworkCoreModule),
-    typeof(ReportBuilderApplicationContractsModule)
+    typeof(ReportBuilderApplicationContractsModule),
+    typeof(ReportBuilderApplicationModule)
 )]
 public class ReportBuilderDbMigratorModule : AbpModule
 {
