@@ -32,8 +32,8 @@ RUN dotnet publish src/ReportBuilder.DbMigrator/ReportBuilder.DbMigrator.csproj 
     -c Release -o /app/migrator --no-restore
 
 # Generate OpenIddict signing cert AFTER publishing, directly into the publish output directory.
-# COPY --from=build /app/publish . then places it at /app/openiddict.pfx in the final image.
-# AddProductionEncryptionAndSigningCertificate() reads it from the file system at runtime.
+# COPY --from=build /app/publish . places it at /app/openiddict.pfx in the final image.
+# AddProductionEncryptionAndSigningCertificate() reads it from the working directory at runtime.
 RUN dotnet dev-certs https -ep /app/publish/openiddict.pfx \
     -p fd092b11-86a2-4a31-9949-875ac31369ce
 
@@ -42,8 +42,10 @@ WORKDIR /app
 COPY --from=build /app/publish .
 COPY --from=build /app/migrator ./migrator/
 
-# Startup script: run migrator then start the API
-RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\nexec dotnet /app/ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
+# Startup script: run migrator then cd back to /app before starting the API.
+# The cd back is critical — openiddict.pfx is at /app/openiddict.pfx and
+# AddProductionEncryptionAndSigningCertificate uses a relative path lookup.
+RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\ncd /app/migrator && dotnet ReportBuilder.DbMigrator.dll\necho "Migrations done. Starting API..."\ncd /app\nexec dotnet ReportBuilder.HttpApi.Host.dll\n' > /app/start.sh && chmod +x /app/start.sh
 
 ENV ASPNETCORE_URLS=http://+:80
 ENTRYPOINT ["/app/start.sh"]
