@@ -25,7 +25,6 @@ public class ReportBuilderPermissionDataSeedContributor : IDataSeedContributor, 
     public async Task SeedAsync(DataSeedContext context)
     {
         await GrantAsync(ReportBuilderPermissions.Dashboard.Host);
-        await GrantAsync(ReportBuilderPermissions.Dashboard.Tenant);
 
         await GrantAsync(ReportBuilderPermissions.Students.Default);
         await GrantAsync(ReportBuilderPermissions.Students.Create);
