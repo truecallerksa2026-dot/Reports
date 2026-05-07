@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
+using ReportBuilder.Permissions;
 using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 
-namespace ReportBuilder.Permissions;
+namespace ReportBuilder;
 
 /// <summary>
 /// Grants all ReportBuilder permissions to the built-in admin role on seed.
